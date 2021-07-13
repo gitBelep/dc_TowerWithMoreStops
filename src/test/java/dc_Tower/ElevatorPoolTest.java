@@ -11,81 +11,77 @@ class ElevatorPoolTest {
     @BeforeEach
     void init() throws InterruptedException {
         pool = new ElevatorPool();
- //       Thread.sleep(1);    //other way "Elevator is null" because seems to be busy
     }
 
     @Test
-    void testGetNearestFreeElevator1() throws InterruptedException {
-        pool.addRequest(new Request(0, 2));
+    void testAddThreeToTheSameElevator() throws InterruptedException {
         pool.addRequest(new Request(0, 3));
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());
-        Thread.sleep(10_000);
+        pool.addRequest(new Request(0, 3));
+        pool.addRequest(new Request(0, 5));
 
-        pool.addRequest(new Request(6, 0));
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());   //id1 is the nearest, needs 1 sec to floor 6 then 6 sec to floor 0.
-        Thread.sleep(8_000);
+        assertEquals(0, pool.getElevators().get(0).getNumberOfPassangers());
 
-        List<Elevator> elevators = pool.getElevators();
-        assertEquals(9, elevators.get(0).getCurrentPos());
-        assertEquals(0, elevators.get(1).getCurrentPos());
+        for(int i = 0; i < 8; i++) {
+            while (!pool.getRequests().isEmpty()) {
+                Elevator nearestElevator = pool.getNearestFreeElevatorOrNull();
+                if (nearestElevator != null) {
+                    pool.liftPerson(nearestElevator);
+                } else {
+                    break;
+                }
+            }
+
+            if(i == 0) {
+
+                assertEquals(0, pool.getElevators().get(0).getCurrentPos());
+
+            }
+            pool.dispositionOfElevators();
+        }
+        assertEquals(0, pool.getElevators().get(0).getNumberOfPassangers());
+        assertEquals(5, pool.getElevators().get(0).getCurrentPos());
     }
 
     @Test
-    void testGetNearestFreeElevator() throws InterruptedException {
-        pool.addRequest(new Request(0, 9));
-        pool.addRequest(new Request(0, 5));
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());    //id0 is on floor 9 & will be free in 9 sec
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());    //id1 is on floor 5 & will be free in 5 sec
-        Thread.sleep(10_000);
+    void testNearestFreeElevatorTakesMorePassangers() throws InterruptedException {
+        List<Request> r = List.of(
+                new Request(0, 4), //I assume, passanger will be taken from elevator Nr:0
+                new Request(0, 4), //1
+                new Request(0, 2), //2
+                new Request(0, 2), //3
+                new Request(0, 2), //4
+                new Request(0, 2), //5
+                new Request(0, 2), //6
+                new Request(7, 0), //0 !
+                new Request(9, 0), //1 !
+                new Request(2, 0), //2
+                new Request(7, 0), //0 !
+                new Request(0, 3) ); //3
 
-        pool.addRequest(new Request(6, 0));
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());   //id1 is the nearest, needs 1 sec to floor 6 then 6 sec to floor 0.
-        Thread.sleep(8_000);
+        for(int i = 0; i < 25; i++) {
+            System.out.println("__ "+ i +" __");
+            if(i < r.size()){
+                pool.addRequest(r.get(i));
+            }
+            while (!pool.getRequests().isEmpty()) {
+                Elevator nearestElevator = pool.getNearestFreeElevatorOrNull();
+                if (nearestElevator != null) {
+                    pool.liftPerson(nearestElevator);
+                } else {
+                    break;
+                }
+            }
+            pool.dispositionOfElevators();
+        }
 
-        List<Elevator> elevators = pool.getElevators();
-        assertEquals(9, elevators.get(0).getCurrentPos());
-        assertEquals(0, elevators.get(1).getCurrentPos());
-    }
-
-    @Test
-    void testFor8thRequestGetNoElevatorButNull() throws InterruptedException {
-        pool.addRequest(new Request(0, 4));
-        pool.addRequest(new Request(0, 5));
-        pool.addRequest(new Request(0, 3));
-        pool.addRequest(new Request(0, 4));
-        pool.addRequest(new Request(0, 5));
-        pool.addRequest(new Request(0, 1)); //id5 will be free in 1 sec
-        pool.addRequest(new Request(0, 3));
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull());
-
-        assertEquals(0, pool.getRequests().size());
-
-        pool.addRequest(new Request(0, 2));
-
-        assertEquals(1, pool.getRequests().size());
-        assertNull(pool.getNearestFreeElevatorOrNull());    //no elevators are free
-
-        Thread.sleep(2_000);
-
-        pool.liftPerson(pool.getNearestFreeElevatorOrNull()); //id5 is free, needs 1 sec down & 2 sec to 2nd floor.
-
-        Thread.sleep(4_000);
-
-        List<Elevator> elevators = pool.getElevators();
-
-        assertEquals(4, elevators.get(0).getCurrentPos());
-        assertEquals(5, elevators.get(1).getCurrentPos());
-        assertEquals(3, elevators.get(2).getCurrentPos());
-        assertEquals(4, elevators.get(3).getCurrentPos());
-        assertEquals(5, elevators.get(4).getCurrentPos());
-        assertEquals(2, elevators.get(5).getCurrentPos());
+        List<Elevator> elev = pool.getElevators();
+        assertEquals(0, elev.get(0).getCurrentPos());
+        assertEquals(0, elev.get(1).getCurrentPos());
+        assertEquals(0, elev.get(2).getCurrentPos());
+        assertEquals(3, elev.get(3).getCurrentPos());
+        assertEquals(2, elev.get(4).getCurrentPos());
+        assertEquals(2, elev.get(5).getCurrentPos());
+        assertEquals(2, elev.get(6).getCurrentPos());
     }
 
     @Test

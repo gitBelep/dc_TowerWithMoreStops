@@ -7,9 +7,6 @@ public class Elevator {
     private final int id;
     private int currentPos;
     private Direction direction;
-  //  private Request request;
-    //    private boolean withPerson;
-    //   private boolean busy;
     private List<Integer> startFloors;
     private List<Integer> destinationFloors;
     private int numberOfPassangers;
@@ -31,79 +28,41 @@ public class Elevator {
         return currentPos;
     }
 
-    public void setCurrentPos(int currentPos) {
-        this.currentPos = currentPos;
-    }
-
     public Direction getDirection() {
         return direction;
     }
 
-    public void setDirection(Direction direction) {
-        this.direction = direction;
-    }
-
-//    public boolean isWithPerson() {
-//        return withPerson;
-//    }
-
-//    public void setWithPerson(boolean withPerson) {
-//        this.withPerson = withPerson;
-//    }
-
-//    public Request getRequest() {
-//        return request;
-//    }
-//
-
     public List<Integer> getDestinationFloors() {
         return new ArrayList<>(destinationFloors);
-    }
-
-    public void setRequest(Request request) {
-        setDirection(request.getDirection());
-        //       setBusy(true);
-//        withPerson = getCurrentPos() == request.getCurrentFloor();
-        startFloors.add(request.getCurrentFloor());
-        Collections.sort(startFloors);
-        destinationFloors.add(request.getDestinationFloor());
-        destinationFloors.sort(Comparator.reverseOrder());
-//        this.request = request;
     }
 
     public List<Integer> getStartFloors() {
         return new ArrayList<>(startFloors);
     }
 
-//    public boolean isBusy() {
-//        return busy;
-//    }
-//
-//    public void setBusy(boolean busy) {
-//        this.busy = busy;
-//    }
-//
-
     public int getNumberOfPassangers() {
         return numberOfPassangers;
     }
 
-//    public void setNumberOfPassangers(int numberOfPassangers) {
-//        this.numberOfPassangers = numberOfPassangers;
-//    }
-//
-    public void travelOneStep() {
-        if (direction == Direction.DOWN) {
-            travelOneStepDown();
+    public void setRequest(Request request) {
+        direction = request.getDirection();
+        startFloors.add(request.getCurrentFloor());
+        startFloors.sort(Collections.reverseOrder());
+        destinationFloors.add(request.getDestinationFloor());
+        Collections.sort(destinationFloors);
+    }
 
+    public void travelOneStepOrCollectPassanger() {
+        if (direction == Direction.DOWN) {
+            travelOneStepDownOrCollectPassanger();
         } else {
-            travelOneStepUp();
+            travelOneStepUpOrCollectPassanger();
         }
     }
 
-    private void travelOneStepDown() {
-        if (!startFloors.isEmpty()) {             //empty elevator
-            System.out.println(getId()+"one down empty");
+    private void travelOneStepDownOrCollectPassanger() {
+        if (!startFloors.isEmpty()) {               //passangers are still waiting
+            System.out.println(id+"one down van még beszálló, pos:" +currentPos);
             if (currentPos == startFloors.get(0)) {
                 for (Iterator<Integer> i = startFloors.iterator(); i.hasNext(); ) {
                     int value = i.next();
@@ -115,8 +74,8 @@ public class Elevator {
             } else {
                 moveElevator(startFloors.get(0));
             }
-        } else {                             //with passengers
-            System.out.println(getId()+"one down with");
+        } else {                                    //delivering passangers
+            System.out.println(id+"one down szállít");
             if (this.currentPos == 0) {
                 numberOfPassangers = 0;
                 direction = Direction.UP;
@@ -127,33 +86,36 @@ public class Elevator {
         }
     }
 
-    private void travelOneStepUp() {
-        if(!startFloors.isEmpty()){          //empty elevator
-            System.out.println(getId()+"one up empty");
-            if(currentPos == 0){
+    private void travelOneStepUpOrCollectPassanger() {
+        if (numberOfPassangers == 0) {
+            System.out.println(id+ "one up beszáll");
+            if (currentPos == 0) {                  //everybody gets in
                 numberOfPassangers = destinationFloors.size();
                 startFloors = new ArrayList<>(4);
+                moveElevator(destinationFloors.get(0));
             } else {
                 moveElevator(0);
             }
-        } else{                              //with passengers
-            System.out.println(getId()+"one up with");
-            if (currentPos == destinationFloors.get(0)) {
-                for (Iterator<Integer> i = destinationFloors.iterator(); i.hasNext(); ) {
-                    int value = i.next();
-                    if (value == currentPos) {
-                        i.remove();
-                        numberOfPassangers--;
+        } else {                                    //with passengers
+            if (!destinationFloors.isEmpty()) {
+                if (currentPos == destinationFloors.get(0)) {
+                    for (Iterator<Integer> i = destinationFloors.iterator(); i.hasNext(); ) {
+                        int value = i.next();
+                        if (value == currentPos) {
+                            i.remove();
+                            numberOfPassangers--;
+                            System.out.println(id+",Pos:"+ currentPos+",megjött. Maradt:"+numberOfPassangers);
+                        }
                     }
+                } else {
+                    moveElevator(destinationFloors.get(0));
                 }
-            } else {
-                moveElevator(destinationFloors.get(0));
             }
         }
     }
 
     private void moveElevator(int destination) {
-        System.out.println(getId()+"move");
+        System.out.println(id + "move, utasok száma:" + numberOfPassangers);
         if (currentPos < destination) {
             currentPos++;
         } else {

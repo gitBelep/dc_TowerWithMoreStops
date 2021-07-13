@@ -5,7 +5,7 @@ import java.util.*;
 public class ElevatorPool {
     private final List<Elevator> elevators = new ArrayList<>(7);
     private final Queue<Request> requests = new LinkedList<>();
-    private final List<Elevator> busyElevators = new LinkedList<>();
+    private final Set<Elevator> busyElevators = new HashSet<>();
 
     public ElevatorPool() {
         for (int i = 0; i < 7; i++) {
@@ -15,9 +15,6 @@ public class ElevatorPool {
 
     public Elevator getNearestFreeElevatorOrNull() {
         Elevator nearestFreeElevator = null;
-//        if (requests.isEmpty()) {
-//            return null;
-//        }
         int personsStartFloor = requests.peek().getCurrentFloor();
         for (Elevator actual : elevators) {
             if ( (actual.getStartFloors().isEmpty() && actual.getDestinationFloors().isEmpty()) ||
@@ -26,7 +23,7 @@ public class ElevatorPool {
                             requests.peek().getDirection() == Direction.DOWN &&
                             actual.getDirection() == Direction.DOWN &&
                             actual.getNumberOfPassangers() < 5 &&
-                            (actual.getCurrentPos() >= requests.peek().getCurrentFloor() || actual.getNumberOfPassangers() == 0) )) {
+                            actual.getCurrentPos() >= requests.peek().getCurrentFloor() )){
                 if (nearestFreeElevator == null) {
                     nearestFreeElevator = actual;
                 }
@@ -35,7 +32,7 @@ public class ElevatorPool {
                 }
             }
         }
-        System.out.println("NFree:"+ nearestFreeElevator.getId()+", ePos"+nearestFreeElevator.getCurrentPos()+", emb db"+nearestFreeElevator.getNumberOfPassangers());
+        System.out.println("NFree:"+ nearestFreeElevator.getId()+", ePos:"+nearestFreeElevator.getCurrentPos()+", "+nearestFreeElevator.getNumberOfPassangers()+" db emb.volt");
         return nearestFreeElevator;
     }
 
@@ -48,9 +45,9 @@ public class ElevatorPool {
     public void dispositionOfElevators() throws InterruptedException {
 //        System.out.println("dispo");
         for (Iterator<Elevator> i = busyElevators.iterator(); i.hasNext(); ) {
-            Elevator value = i.next();
-            if (!value.getDestinationFloors().isEmpty() && !value.getStartFloors().isEmpty()) {
-                value.travelOneStep();
+            Elevator elevator = i.next();
+            if (!elevator.getDestinationFloors().isEmpty() || !elevator.getStartFloors().isEmpty()) {
+                elevator.travelOneStepOrCollectPassanger();
             }else{
                 i.remove();
             }
