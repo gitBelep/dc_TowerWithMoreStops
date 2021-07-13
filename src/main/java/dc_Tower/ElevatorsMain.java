@@ -24,7 +24,6 @@ public class ElevatorsMain {
 
             if (i < requestList.size()) {      //Requests are coming & they have to be stored
                 pool.addRequest(requestList.get(i));
-                System.out.println("rq:" + i);
                 i++;
             }
         }

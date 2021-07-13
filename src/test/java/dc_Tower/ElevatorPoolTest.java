@@ -21,7 +21,7 @@ class ElevatorPoolTest {
 
         assertEquals(0, pool.getElevators().get(0).getNumberOfPassangers());
 
-        for(int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++) {
             while (!pool.getRequests().isEmpty()) {
                 Elevator nearestElevator = pool.getNearestFreeElevatorOrNull();
                 if (nearestElevator != null) {
@@ -31,7 +31,7 @@ class ElevatorPoolTest {
                 }
             }
 
-            if(i == 0) {
+            if (i == 0) {
 
                 assertEquals(0, pool.getElevators().get(0).getCurrentPos());
 
@@ -56,11 +56,10 @@ class ElevatorPoolTest {
                 new Request(9, 0), //1 !
                 new Request(2, 0), //2
                 new Request(7, 0), //0 !
-                new Request(0, 3) ); //3
+                new Request(0, 3)); //3
 
-        for(int i = 0; i < 25; i++) {
-            System.out.println("__ "+ i +" __");
-            if(i < r.size()){
+        for (int i = 0; i < 25; i++) {
+            if (i < r.size()) {
                 pool.addRequest(r.get(i));
             }
             while (!pool.getRequests().isEmpty()) {

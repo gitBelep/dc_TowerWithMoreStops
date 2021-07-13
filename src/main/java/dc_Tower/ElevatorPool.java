@@ -17,13 +17,13 @@ public class ElevatorPool {
         Elevator nearestFreeElevator = null;
         int personsStartFloor = requests.peek().getCurrentFloor();
         for (Elevator actual : elevators) {
-            if ( (actual.getStartFloors().isEmpty() && actual.getDestinationFloors().isEmpty()) ||
+            if ((actual.getStartFloors().isEmpty() && actual.getDestinationFloors().isEmpty()) ||
                     (actual.getCurrentPos() == 0 && requests.peek().getDirection() == Direction.UP && actual.getNumberOfPassangers() < 5) || //max 5 person
                     (actual.getCurrentPos() != 0 &&
                             requests.peek().getDirection() == Direction.DOWN &&
                             actual.getDirection() == Direction.DOWN &&
                             actual.getNumberOfPassangers() < 5 &&
-                            actual.getCurrentPos() >= requests.peek().getCurrentFloor() )){
+                            actual.getCurrentPos() >= requests.peek().getCurrentFloor())) {
                 if (nearestFreeElevator == null) {
                     nearestFreeElevator = actual;
                 }
@@ -32,23 +32,20 @@ public class ElevatorPool {
                 }
             }
         }
-        System.out.println("NFree:"+ nearestFreeElevator.getId()+", ePos:"+nearestFreeElevator.getCurrentPos()+", "+nearestFreeElevator.getNumberOfPassangers()+" db emb.volt");
         return nearestFreeElevator;
     }
 
     public void liftPerson(Elevator elevator) {
-//        System.out.println("set req");
         elevator.setRequest(requests.poll());
         busyElevators.add(elevator);
     }
 
     public void dispositionOfElevators() throws InterruptedException {
-//        System.out.println("dispo");
         for (Iterator<Elevator> i = busyElevators.iterator(); i.hasNext(); ) {
             Elevator elevator = i.next();
             if (!elevator.getDestinationFloors().isEmpty() || !elevator.getStartFloors().isEmpty()) {
                 elevator.travelOneStepOrCollectPassanger();
-            }else{
+            } else {
                 i.remove();
             }
         }

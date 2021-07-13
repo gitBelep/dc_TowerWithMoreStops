@@ -3,7 +3,7 @@ package dc_Tower;
 import java.util.*;
 
 public class Elevator {
-    static final int TIME_PER_FLOOR = 500;
+    static final int TIME_PER_FLOOR = 1000;
     private final int id;
     private int currentPos;
     private Direction direction;
@@ -62,7 +62,6 @@ public class Elevator {
 
     private void travelOneStepDownOrCollectPassanger() {
         if (!startFloors.isEmpty()) {               //passangers are still waiting
-            System.out.println(id+"one down van még beszálló, pos:" +currentPos);
             if (currentPos == startFloors.get(0)) {
                 for (Iterator<Integer> i = startFloors.iterator(); i.hasNext(); ) {
                     int value = i.next();
@@ -75,7 +74,6 @@ public class Elevator {
                 moveElevator(startFloors.get(0));
             }
         } else {                                    //delivering passangers
-            System.out.println(id+"one down szállít");
             if (this.currentPos == 0) {
                 numberOfPassangers = 0;
                 direction = Direction.UP;
@@ -88,7 +86,6 @@ public class Elevator {
 
     private void travelOneStepUpOrCollectPassanger() {
         if (numberOfPassangers == 0) {
-            System.out.println(id+ "one up beszáll");
             if (currentPos == 0) {                  //everybody gets in
                 numberOfPassangers = destinationFloors.size();
                 startFloors = new ArrayList<>(4);
@@ -104,7 +101,6 @@ public class Elevator {
                         if (value == currentPos) {
                             i.remove();
                             numberOfPassangers--;
-                            System.out.println(id+",Pos:"+ currentPos+",megjött. Maradt:"+numberOfPassangers);
                         }
                     }
                 } else {
@@ -115,7 +111,6 @@ public class Elevator {
     }
 
     private void moveElevator(int destination) {
-        System.out.println(id + "move, utasok száma:" + numberOfPassangers);
         if (currentPos < destination) {
             currentPos++;
         } else {
